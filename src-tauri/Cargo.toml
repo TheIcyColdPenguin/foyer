@@ -15,12 +15,17 @@ tauri-build = { version = "1.2", features = [] }
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.2", features = ["shell-open"] }
+tauri = { version = "1.2", features = ["dialog-open", "dialog-save", "fs-all", "path-all"] }
+rusqlite = {version = "0.28.0", features = ["bundled"] }
+
+[dependencies.fix-path-env]
+git = "https://github.com/tauri-apps/fix-path-env-rs"
+rev = "6c63c49e29e670343b71fee455e1a6c9145f4a8e"
 
 [features]
 # by default Tauri runs in production mode
 # when `tauri dev` runs it is executed with `cargo run --no-default-features` if `devPath` is an URL
 default = ["custom-protocol"]
-# this feature is used used for production builds where `devPath` points to the filesystem
+# this feature is used used for production builds where `devPath` points to the filesystfem
 # DO NOT remove this
 custom-protocol = ["tauri/custom-protocol"]

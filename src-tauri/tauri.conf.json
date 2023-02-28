@@ -12,15 +12,21 @@
     },
     "tauri": {
         "allowlist": {
-            "all": false,
-            "shell": {
-                "all": false,
-                "open": true
+            "path": {
+                "all": true
+            },
+            "fs": {
+                "all": true,
+                "scope": ["$APPDATA/*"]
+            },
+            "dialog": {
+                "open": true,
+                "save": true
             }
         },
         "bundle": {
             "active": true,
-            "category": "DeveloperTool",
+            "category": "Utility",
             "copyright": "",
             "deb": {
                 "depends": []
@@ -33,7 +39,7 @@
                 "icons/icon.icns",
                 "icons/icon.ico"
             ],
-            "identifier": "com.tauri.dev",
+            "identifier": "com.theicycoldpenguin.foyer",
             "longDescription": "",
             "macOS": {
                 "entitlements": null,
