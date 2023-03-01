@@ -1,14 +1,26 @@
 <script lang="ts">
     import { fly } from "svelte/transition";
+    import { onMount } from "svelte";
+
+    import { photos } from "../stores/photos";
+    import { fetchPhotos } from "../utils/fetch-photos";
+
+    onMount(async () => {
+        if (!$photos.length) {
+            $photos = await fetchPhotos();
+        }
+    });
 </script>
 
 <div class="container">
     <h1>Welcome to Your Foyer</h1>
     <main>
-        {#each Array(100).fill(null) as _}
-            <div in:fly={{y:-20}} class="photo">
-                <!-- <img src="icons/category.svg" alt="" /> -->
+        {#each $photos as photo (photo.id)}
+            <div in:fly={{ y: 20 }} class="photo">
+                <img src={photo.img_url} alt="" />
             </div>
+        {:else}
+            <h3>Add some memories</h3>
         {/each}
     </main>
 </div>
@@ -24,6 +36,15 @@
         justify-content: center;
         align-items: center;
     }
+
+    h3 {
+        height: calc(100vh - 10rem);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #ccc;
+    }
+
     main {
         min-width: 0;
         max-width: 95%;
@@ -38,14 +59,15 @@
         grid-template-rows: repeat(auto-fit, minmax(10rem, 1fr));
         grid-auto-flow: row dense;
 
-        gap: 2rem;
+        gap: 1rem;
     }
 
     main > div.photo {
         min-height: 10rem;
-        border: 2px solid white;
         border-radius: 5px;
         overflow: hidden;
+
+        transition: all 0.2 5s ease-in-out;
     }
 
     div.photo > img {
@@ -63,5 +85,9 @@
     }
     main > div.photo:nth-of-type(13n) {
         grid-row: span 2;
+    }
+
+    div.photo:hover{
+        transform: scale(1.05);
     }
 </style>

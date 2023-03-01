@@ -1,18 +1,36 @@
 <script>
-
     import { uploadPhotos } from "../utils/upload";
+    import { photos } from "../stores/photos";
+    import { fetchPhotos } from "../utils/fetch-photos";
 
+    async function handleUpload() {
+        await uploadPhotos();
+        $photos = await fetchPhotos();
+    }
 </script>
+
 <section>
     <span />
     <div>
-        <img src="/icons/upload.svg" alt="icon" width="80%" on:click={uploadPhotos}/>
-        <img src="/icons/all-categories.svg" alt="icon" width="80%" />
-        <img src="/icons/category.svg" alt="icon" width="80%" />
-        <img src="/icons/category.svg" alt="icon" width="80%" />
-        <img src="/icons/category.svg" alt="icon" width="80%" />
+        <button on:click={handleUpload}>
+            <img src="/icons/upload.svg" alt="icon" width="80%" />
+        </button>
+        <button>
+            <img src="/icons/all-categories.svg" alt="icon" width="80%" />
+        </button>
+        <button>
+            <img src="/icons/category.svg" alt="icon" width="80%" />
+        </button>
+        <button>
+            <img src="/icons/category.svg" alt="icon" width="80%" />
+        </button>
+        <button>
+            <img src="/icons/category.svg" alt="icon" width="80%" />
+        </button>
     </div>
-    <img src="/icons/settings.svg" alt="icon" width="100%" />
+    <button>
+        <img src="/icons/settings.svg" alt="icon" width="100%" />
+    </button>
 </section>
 
 <style>
@@ -39,7 +57,17 @@
         justify-content: space-evenly;
     }
 
+    button {
+        display: inline-block;
+        padding: 0;
+        margin: 0;
+        background-color: transparent;
+    }
+
     img {
+        width: 100%;
+        height: 100%;
+        /* object-fit: cover; */
         filter: brightness(0%) saturate(100%) invert(94%) sepia(2%) saturate(5448%) hue-rotate(194deg) brightness(118%)
             contrast(73%);
     }

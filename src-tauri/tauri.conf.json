@@ -58,7 +58,7 @@
             }
         },
         "security": {
-            "csp": null
+            "csp": "'self' foyerimg:"
         },
         "updater": {
             "active": false
