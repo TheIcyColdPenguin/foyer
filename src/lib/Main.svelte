@@ -1,9 +1,11 @@
 <script lang="ts">
-    import { fly, fade } from "svelte/transition";
     import { onMount } from "svelte";
+    import { fade } from "svelte/transition";
 
     import { photos } from "../stores/photos";
+    import { viewing } from "../stores/viewing";
     import { fetchPhotos } from "../utils/fetch-photos";
+    import Photo from "./Photo.svelte";
 
     let lastScrollTop = 0;
 
@@ -22,24 +24,42 @@
             $photos = $photos.concat(await fetchPhotos($photos.length));
         }
     }
+
+    function escapeViewing() {
+        if ($viewing) {
+            $viewing = null;
+        }
+    }
 </script>
 
-<div class="container">
+<div
+    class="container"
+    tabindex="-1"
+    on:keyup={(e) => {
+        if (e.key == "Escape") {
+            escapeViewing();
+        }
+    }}
+>
     <h1>Welcome to Your Foyer</h1>
-    <main on:scroll={(e) => handleScroll(e)}>
+    <main class={$viewing ? "viewing" : ""} on:scroll={(e) => handleScroll(e)}>
         {#each $photos as photo (photo.id)}
-            <div in:fly={{ y: 20 }} class="photo">
-                <img loading="lazy" in:fade src={photo.img_url} alt="" />
-            </div>
+            <Photo {photo} />
         {:else}
             <h3>Add some memories</h3>
         {/each}
     </main>
+    {#if $viewing}
+        <div transition:fade={{ duration: 125 }} class="viewing" on:click={escapeViewing} on:keypress={escapeViewing}>
+            <img src={$viewing.img_url} alt="" />
+        </div>
+    {/if}
 </div>
 
 <style>
     div.container {
         height: 100vh;
+        outline: none;
     }
 
     h1 {
@@ -74,33 +94,31 @@
         gap: 0.5rem;
     }
 
-    main > div.photo {
-        min-height: 10rem;
+    div.viewing {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+
+        width: 100vw;
+        height: 100vh;
+
+        z-index: 100;
         border-radius: 5px;
-        overflow: hidden;
 
-        transition: all 0.05s ease-in-out;
-    }
-
-    div.photo > img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+        background-color: #000c;
     }
 
-    main > div.photo:nth-of-type(7n) {
-        grid-column: span 2;
-        grid-row: span 2;
-    }
-    main > div.photo:nth-of-type(9n) {
-        grid-column: span 2;
-    }
-    main > div.photo:nth-of-type(13n) {
-        grid-row: span 2;
-    }
+    div.viewing > img {
+        position: absolute;
 
-    div.photo:hover {
-        z-index: 10;
-        transform: scale(1.01);
+        width: 95%;
+        height: 95%;
+
+        top: 50%;
+        left: 50%;
+
+        transform: translate(-50%, -50%);
+
+        object-fit: contain;
     }
 </style>
