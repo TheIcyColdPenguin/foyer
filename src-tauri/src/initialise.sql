@@ -1,7 +1,8 @@
 CREATE TABLE IF NOT EXISTS photos (
     id INTEGER PRIMARY KEY,
     img_data BLOB NOT NULL,
-    timestamp DATETIME DEFAULT NOW
+    extension TEXT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS labels (

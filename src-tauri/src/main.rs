@@ -8,15 +8,8 @@ mod img_uri_handler;
 mod string_error;
 mod types;
 
-use std::collections::HashMap;
-
-use commands::{connect_db, fetch_photos, upload_photos, Database};
+use commands::{connect_db, fetch_photos_after, upload_photos, Database};
 use img_uri_handler::handle_image_request;
-use string_error::Nope;
-use tauri::{
-    http::{method::Method, ResponseBuilder, Uri},
-    Manager,
-};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     fix_path_env::fix()?;
@@ -26,7 +19,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .invoke_handler(tauri::generate_handler![
             connect_db,
             upload_photos,
-            fetch_photos
+            fetch_photos_after
         ])
         .manage(Database::default())
         .run(tauri::generate_context!())
