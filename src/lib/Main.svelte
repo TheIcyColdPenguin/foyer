@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { fly } from "svelte/transition";
+    import { fly , fade } from "svelte/transition";
     import { onMount } from "svelte";
 
     import { photos } from "../stores/photos";
@@ -17,7 +17,7 @@
     <main>
         {#each $photos as photo (photo.id)}
             <div in:fly={{ y: 20 }} class="photo">
-                <img src={photo.img_url} alt="" />
+                <img loading="lazy" in:fade src={photo.img_url} alt="" />
             </div>
         {:else}
             <h3>Add some memories</h3>
@@ -59,7 +59,7 @@
         grid-template-rows: repeat(auto-fit, minmax(10rem, 1fr));
         grid-auto-flow: row dense;
 
-        gap: 1rem;
+        gap: 0.5rem;
     }
 
     main > div.photo {
@@ -67,13 +67,14 @@
         border-radius: 5px;
         overflow: hidden;
 
-        transition: all 0.2 5s ease-in-out;
+        transition: all 0.05s ease-in-out;
     }
 
     div.photo > img {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        
     }
 
     main > div.photo:nth-of-type(7n) {
@@ -88,6 +89,7 @@
     }
 
     div.photo:hover{
-        transform: scale(1.05);
+        z-index: 10;
+        transform: scale(1.01);
     }
 </style>
