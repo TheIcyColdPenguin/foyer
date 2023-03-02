@@ -3,11 +3,10 @@
     import Main from "./lib/Main.svelte";
     import Sidebar from "./lib/Sidebar.svelte";
 
-    import { createAllAppDirectories, connectDatabase } from "./utils/init.js";
+    import { init } from "./utils/init.js";
 
     onMount(async () => {
-        createAllAppDirectories();
-        connectDatabase();
+        init();
     });
 </script>
 

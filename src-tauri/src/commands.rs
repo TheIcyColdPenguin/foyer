@@ -72,6 +72,12 @@ fn get_exif(path: &PathBuf) -> Result<String, String> {
 pub struct Database(pub Mutex<Option<Connection>>);
 
 #[tauri::command]
+pub async fn is_connected_db(state: tauri::State<'_, Database>) -> Result<bool, String> {
+    println!("hmmm");
+    let lock = state.0.lock().nope()?;
+    Ok(lock.is_some())
+}
+#[tauri::command]
 pub async fn connect_db(db_path: String, state: tauri::State<'_, Database>) -> Result<(), String> {
     let connection = Connection::open(db_path).nope()?;
 
