@@ -1,20 +1,32 @@
 <script lang="ts">
-    import { fly , fade } from "svelte/transition";
+    import { fly, fade } from "svelte/transition";
     import { onMount } from "svelte";
 
     import { photos } from "../stores/photos";
     import { fetchPhotos } from "../utils/fetch-photos";
+
+    let lastScrollTop = 0;
 
     onMount(async () => {
         if (!$photos.length) {
             $photos = await fetchPhotos();
         }
     });
+
+    async function handleScroll({ currentTarget: elem }: { currentTarget: HTMLElement }) {
+        if (elem.scrollTop < lastScrollTop) {
+            return; // upscroll
+        }
+        lastScrollTop = elem.scrollTop <= 0 ? 0 : elem.scrollTop;
+        if (elem.scrollTop + elem.offsetHeight >= elem.scrollHeight) {
+            $photos = $photos.concat(await fetchPhotos($photos.length));
+        }
+    }
 </script>
 
 <div class="container">
     <h1>Welcome to Your Foyer</h1>
-    <main>
+    <main on:scroll={(e) => handleScroll(e)}>
         {#each $photos as photo (photo.id)}
             <div in:fly={{ y: 20 }} class="photo">
                 <img loading="lazy" in:fade src={photo.img_url} alt="" />
@@ -74,7 +86,6 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        
     }
 
     main > div.photo:nth-of-type(7n) {
@@ -88,7 +99,7 @@
         grid-row: span 2;
     }
 
-    div.photo:hover{
+    div.photo:hover {
         z-index: 10;
         transform: scale(1.01);
     }
