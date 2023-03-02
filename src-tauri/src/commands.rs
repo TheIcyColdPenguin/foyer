@@ -73,7 +73,6 @@ pub struct Database(pub Mutex<Option<Connection>>);
 
 #[tauri::command]
 pub async fn is_connected_db(state: tauri::State<'_, Database>) -> Result<bool, String> {
-    println!("hmmm");
     let lock = state.0.lock().nope()?;
     Ok(lock.is_some())
 }

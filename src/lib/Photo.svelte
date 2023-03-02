@@ -9,7 +9,6 @@
 
     function handleClick() {
         $viewing = photo;
-        console.log($viewing);
     }
 </script>
 
