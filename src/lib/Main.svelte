@@ -2,7 +2,7 @@
     import { onMount } from "svelte";
     import { fade } from "svelte/transition";
 
-    import { photos } from "../stores/photos";
+    import { photos, groupedPhotos } from "../stores/photos";
     import { viewing } from "../stores/viewing";
     import { fetchPhotos } from "../utils/fetch-photos";
     import Photo from "./Photo.svelte";
@@ -43,8 +43,18 @@
 >
     <h1>Welcome to Your Foyer</h1>
     <main class={$viewing ? "viewing" : ""} on:scroll={(e) => handleScroll(e)}>
-        {#each $photos as photo (photo.id)}
-            <Photo {photo} />
+        {#each $groupedPhotos as group}
+            <div class="photo-group">
+                <div class="day-banner">
+                    <span>
+                        {new Date(group[0].timestamp).toLocaleDateString(undefined, { dateStyle: "full" })}
+                    </span>
+                </div>
+
+                {#each { length: group.length } as _, i (group[i].id)}
+                    <Photo photo={group[i]} />
+                {/each}
+            </div>
         {:else}
             <h3>Add some memories</h3>
         {/each}
@@ -86,12 +96,37 @@
         padding: 1rem 1rem;
         margin: 1rem 1rem;
 
+        /* display: grid;
+        grid-template-columns: 1fr; */
+
+        display: flex;
+        flex-direction: column;
+    }
+
+    div.photo-group {
+        width: 100%;
+        min-width: 100%;
+        height: 100%;
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
-        grid-template-rows: repeat(auto-fit, minmax(10rem, 1fr));
+        grid-template-rows: repeat(auto-fit, 10rem);
         grid-auto-flow: row dense;
 
         gap: 0.5rem;
+    }
+
+    div.day-banner {
+        min-height: 10rem;
+        max-height: 10rem;
+        grid-column: 1/-1;
+        grid-row: span 1;
+
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        text-align: left;
+        font-size: xx-large;
+        transform: translateY(20%);
     }
 
     div.viewing {

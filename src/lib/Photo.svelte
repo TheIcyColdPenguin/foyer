@@ -13,7 +13,7 @@
 </script>
 
 <div in:fly={{ y: 20 }} class="photo" on:click={handleClick} on:keypress={handleClick}>
-    <img loading="lazy" in:fade src={photo.img_url} alt="" />
+    <img in:fade src={photo.img_url} alt="" />
 </div>
 
 <style>

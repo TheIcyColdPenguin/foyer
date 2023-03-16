@@ -4,7 +4,7 @@ use img_parts::{jpeg::Jpeg, png::Png, ImageEXIF};
 use rusqlite::{params, Connection};
 
 use crate::{string_error::Nope, types::Photo};
-use std::{fs, path::PathBuf, sync::Mutex};
+use std::{fs, path::PathBuf, sync::Mutex, time::SystemTime};
 
 macro_rules! skip_fail {
     ($x:expr) => {
@@ -22,11 +22,17 @@ fn is_image(ext: &str) -> bool {
     ["png", "jpg", "gif", "tiff", "jpeg", "bmp"].contains(&ext)
 }
 
-fn get_exif(path: &PathBuf) -> Result<String, String> {
+fn get_current_timestamp() -> String {
+    DateTime::<Utc>::from(SystemTime::now())
+        .format("%+")
+        .to_string()
+}
+
+fn get_exif_timestamp(path: &PathBuf) -> Result<String, String> {
     let read_file = fs::read(&path).nope()?;
     let extension = path.extension().map(|s| s.to_string_lossy().to_string());
 
-    let mut exif_raw = match extension.as_deref() {
+    let exif_raw = match extension.as_deref() {
         Some("jpeg") | Some("jpg") => {
             let jpeg = Jpeg::from_bytes(read_file.into()).nope()?;
             jpeg.exif()
@@ -38,34 +44,39 @@ fn get_exif(path: &PathBuf) -> Result<String, String> {
         _ => None,
     };
 
-    let datetime = loop {
-        match exif_raw {
-            Some(ref raw_data) => {
-                let exifreader = exif::Reader::new();
-                let maybe_exif = exifreader.read_raw(raw_data.clone().into());
-                let Ok(exif) = maybe_exif else {
-                    exif_raw = None;
-                    continue;
-                };
-
-                let Some(tag) = exif.get_field(Tag::DateTime, exif::In::PRIMARY) else {
-                    exif_raw=None;
-                    continue;
-                };
-
-                break Ok(tag.display_value().to_string());
-            }
-            None => {
-                let file_opened = fs::File::open(&path).nope()?;
-                let metadata = file_opened.metadata().nope()?;
-                let datetime: DateTime<Utc> = DateTime::from(metadata.created().nope()?);
-
-                break Ok(datetime.format("%+").to_string());
-            }
-        }
+    let Some(raw_data) = exif_raw else {
+        return Err("No data found".into());
     };
 
-    datetime
+    let exifreader = exif::Reader::new();
+    let exif = exifreader.read_raw(raw_data.clone().into()).nope()?;
+
+    let tag = exif
+        .get_field(Tag::DateTime, exif::In::PRIMARY)
+        .ok_or("field not found".to_string())
+        .nope()?;
+
+    Ok(tag.display_value().to_string())
+}
+
+fn get_exif_from_file_metadata(path: &PathBuf) -> Result<String, String> {
+    let file_opened = fs::File::open(&path).nope()?;
+    let metadata = file_opened.metadata().nope()?;
+    let datetime: DateTime<Utc> = DateTime::from(metadata.created().nope()?);
+
+    Ok(datetime.format("%+").to_string())
+}
+
+fn get_exif(path: &PathBuf) -> String {
+    if let Ok(timestamp) = get_exif_timestamp(path) {
+        return timestamp;
+    }
+
+    if let Ok(timestamp) = get_exif_from_file_metadata(path) {
+        return dbg!(timestamp);
+    }
+
+    get_current_timestamp()
 }
 
 #[derive(Default, Debug)]
@@ -112,9 +123,9 @@ pub async fn upload_photos(
                 continue;
             }
 
-            let data = skip_fail!(fs::read(&file_path));
+            let timestamp = get_exif(&file_path);
 
-            let timestamp = get_exif(&file_path).unwrap_or("".into());
+            let data = skip_fail!(fs::read(&file_path));
 
             file_details.push((data, extension, timestamp));
         }
@@ -130,13 +141,9 @@ pub async fn upload_photos(
 
     for (file, ext, timestamp) in file_details.iter() {
         skip_fail!(statement.execute(params![
-            file, // binary photo data
-            ext,  // file extension
-            if timestamp.is_empty() {
-                "datetime('now')"
-            } else {
-                timestamp
-            }
+            file,      // binary photo data
+            ext,       // file extension
+            timestamp  // photo created timestamp, or current timestamp if that doesnt exist
         ]));
     }
 
