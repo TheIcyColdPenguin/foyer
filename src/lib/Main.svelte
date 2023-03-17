@@ -5,7 +5,7 @@
     import { photos, groupedPhotos } from "../stores/photos";
     import { viewing } from "../stores/viewing";
     import { fetchPhotos } from "../utils/fetch-photos";
-    import Photo from "./Photo.svelte";
+    import GridLayout from "./GridLayout.svelte";
 
     let lastScrollTop = 0;
 
@@ -44,16 +44,14 @@
     <h1>Welcome to Your Foyer</h1>
     <main class={$viewing ? "viewing" : ""} on:scroll={(e) => handleScroll(e)}>
         {#each $groupedPhotos as group}
-            <div class="photo-group">
+            <div>
                 <div class="day-banner">
                     <span>
                         {new Date(group[0].timestamp).toLocaleDateString(undefined, { dateStyle: "full" })}
                     </span>
                 </div>
 
-                {#each { length: group.length } as _, i (group[i].id)}
-                    <Photo photo={group[i]} />
-                {/each}
+                <GridLayout {group} />
             </div>
         {:else}
             <h3>Add some memories</h3>
@@ -95,22 +93,6 @@
         overflow-y: visible;
         padding: 1rem 1rem;
         margin: 1rem 1rem;
-
-        display: flex;
-        flex-direction: column;
-    }
-
-    div.photo-group {
-        width: 100%;
-        min-width: 100%;
-        height: 100%;
-
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
-        grid-template-rows: repeat(auto-fit, 10rem);
-        grid-auto-flow: row dense;
-
-        gap: 0.5rem;
     }
 
     div.day-banner {

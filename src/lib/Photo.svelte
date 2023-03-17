@@ -42,30 +42,18 @@
 
 <style>
     div.photo {
-        min-height: 10rem;
         border-radius: 5px;
+        margin-block: 1rem;
         background-color: #000;
         overflow: hidden;
-
-        transition: all 0.05s ease-in-out;
     }
 
     div.photo > img {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        vertical-align: middle;
         transition: all 0.05s ease-in-out;
-    }
-
-    div.photo:nth-of-type(7n) {
-        grid-column: span 2;
-        grid-row: span 2;
-    }
-    div.photo:nth-of-type(9n) {
-        grid-column: span 2;
-    }
-    div.photo:nth-of-type(13n) {
-        grid-row: span 2;
     }
 
     div.photo:hover > img {
