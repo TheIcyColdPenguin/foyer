@@ -1,4 +1,4 @@
-import type { Photo } from "src/types/photo";
+import type { Photo } from "../types/photo";
 import { derived, writable, type Writable } from "svelte/store";
 
 export const photos = writable<Photo[]>([]);

@@ -96,9 +96,6 @@
         padding: 1rem 1rem;
         margin: 1rem 1rem;
 
-        /* display: grid;
-        grid-template-columns: 1fr; */
-
         display: flex;
         flex-direction: column;
     }
@@ -107,6 +104,7 @@
         width: 100%;
         min-width: 100%;
         height: 100%;
+
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
         grid-template-rows: repeat(auto-fit, 10rem);

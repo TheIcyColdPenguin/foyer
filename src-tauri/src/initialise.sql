@@ -4,17 +4,21 @@ CREATE TABLE IF NOT EXISTS photos (
     extension TEXT,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+CREATE INDEX IF NOT EXISTS idx_photos_timestamp on photos(timestamp);
 
-CREATE TABLE IF NOT EXISTS labels (
+CREATE TABLE IF NOT EXISTS tags (
     id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL,
-    colour TEXT NOT NULL
+    name TEXT UNIQUE NOT NULL,
+    colour TEXT DEFAULT "#bb86db"
 );
+CREATE INDEX IF NOT EXISTS idx_tags_name on tags(name);
 
-CREATE TABLE IF NOT EXISTS photos_labels (
-    id INTEGER PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS photos_tags (
     photo_id INTEGER NOT NULL,
-    label_id INTEGER NOT NULL,
+    tag_id INTEGER NOT NULL,
     FOREIGN KEY (photo_id) REFERENCES photos(id),
-    FOREIGN KEY (label_id) REFERENCES labels(id) 
+    FOREIGN KEY (tag_id) REFERENCES tags(id),
+    PRIMARY KEY (photo_id, tag_id)
 );
+CREATE INDEX IF NOT EXISTS idx_photos_tags_photo_id on photos_tags(photo_id);
+CREATE INDEX IF NOT EXISTS idx_photos_tags_tag_id on photos_tags(tag_id);

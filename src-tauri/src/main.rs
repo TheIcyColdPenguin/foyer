@@ -8,7 +8,10 @@ mod img_uri_handler;
 mod string_error;
 mod types;
 
-use commands::{connect_db, fetch_photos_after, is_connected_db, upload_photos, Database};
+use commands::{
+    add_tag, connect_db, create_tag, fetch_all_tags, fetch_photos_after, fetch_tags,
+    is_connected_db, upload_photos, Database,
+};
 use img_uri_handler::handle_image_request;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -20,7 +23,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             is_connected_db,
             connect_db,
             upload_photos,
-            fetch_photos_after
+            fetch_photos_after,
+            create_tag,
+            add_tag,
+            fetch_tags,
+            fetch_all_tags
         ])
         .manage(Database::default())
         .run(tauri::generate_context!())

@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api";
-import type { Photo, RawPhoto } from "src/types/photo";
+import type { Photo, RawPhoto } from "../types/photo";
 import { connectDatabase } from "./init";
 export async function fetchPhotos(offset?: number): Promise<Photo[]> {
     await connectDatabase();

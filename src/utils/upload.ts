@@ -20,5 +20,5 @@ export async function uploadPhotos() {
         folders = folder;
     }
 
-    invoke("upload_photos", { folders });
+    await invoke("upload_photos", { folders });
 }

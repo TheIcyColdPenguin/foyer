@@ -1,9 +1,11 @@
 use chrono::{DateTime, Utc};
-use exif::Tag;
 use img_parts::{jpeg::Jpeg, png::Png, ImageEXIF};
 use rusqlite::{params, Connection};
 
-use crate::{string_error::Nope, types::Photo};
+use crate::{
+    string_error::Nope,
+    types::{Photo, Tag},
+};
 use std::{fs, path::PathBuf, sync::Mutex, time::SystemTime};
 
 macro_rules! skip_fail {
@@ -52,7 +54,7 @@ fn get_exif_timestamp(path: &PathBuf) -> Result<String, String> {
     let exif = exifreader.read_raw(raw_data.clone().into()).nope()?;
 
     let tag = exif
-        .get_field(Tag::DateTime, exif::In::PRIMARY)
+        .get_field(exif::Tag::DateTime, exif::In::PRIMARY)
         .ok_or("field not found".to_string())
         .nope()?;
 
@@ -177,4 +179,98 @@ pub async fn fetch_photos_after(
         .collect();
 
     Ok(photos)
+}
+
+#[tauri::command]
+pub async fn fetch_all_tags(state: tauri::State<'_, Database>) -> Result<Vec<Tag>, String> {
+    let Some(ref mut conn) = * state.0.lock().nope()? else {
+        return Err("connection not established".into());
+    };
+    let mut statement = conn
+        .prepare_cached(
+            "SELECT tags.id, tags.name, tags.colour
+            FROM tags ORDER BY name;",
+        )
+        .nope()?;
+
+    let tags: Vec<_> = statement
+        .query_map([], |row| {
+            Ok(Tag {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                colour: row.get(2)?,
+            })
+        })
+        .nope()?
+        .filter_map(|tag| tag.ok())
+        .collect();
+
+    Ok(tags)
+}
+
+#[tauri::command]
+pub async fn fetch_tags(
+    photo_id: u64,
+    state: tauri::State<'_, Database>,
+) -> Result<Vec<Tag>, String> {
+    let Some(ref mut conn) = * state.0.lock().nope()? else {
+        return Err("connection not established".into());
+    };
+    let mut statement = conn
+        .prepare_cached(
+            "SELECT tags.id, tags.name, tags.colour
+            FROM tags, photos, photos_tags
+            WHERE photos.id=? AND photos.id=photos_tags.photo_id AND photos_tags.tag_id=tags.id
+            ORDER BY name;",
+        )
+        .nope()?;
+
+    let tags: Vec<_> = statement
+        .query_map([photo_id], |row| {
+            Ok(Tag {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                colour: row.get(2)?,
+            })
+        })
+        .nope()?
+        .filter_map(|tag| tag.ok())
+        .collect();
+
+    Ok(tags)
+}
+
+#[tauri::command]
+pub async fn create_tag(
+    tag_name: String,
+    state: tauri::State<'_, Database>,
+) -> Result<i64, String> {
+    let Some(ref mut conn) = * state.0.lock().nope()? else {
+        return Err("connection not established".into());
+    };
+    let mut statement = conn
+        .prepare_cached("INSERT INTO tags(name) VALUES (?);")
+        .nope()?;
+
+    statement.execute([tag_name]).nope()?;
+
+    Ok(conn.last_insert_rowid())
+}
+
+#[tauri::command]
+pub async fn add_tag(
+    photo_id: u64,
+    tag_id: u64,
+    state: tauri::State<'_, Database>,
+) -> Result<(), String> {
+    let Some(ref mut conn) = * state.0.lock().nope()? else {
+        return Err("connection not established".into());
+    };
+    let mut statement = conn
+        .prepare_cached("INSERT INTO photos_tags(photo_id, tag_id) VALUES (?, ?);")
+        .nope()?;
+
+    statement.execute([photo_id, tag_id]).nope()?;
+
+    Ok(())
 }
