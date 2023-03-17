@@ -75,6 +75,10 @@
         display: flex;
         justify-content: center;
         align-items: center;
+
+        font-size: clamp(2rem, 2vw + 1rem, 4rem);
+        line-height: 1;
+
     }
 
     h3 {
@@ -105,7 +109,8 @@
         justify-content: flex-start;
         align-items: center;
         text-align: left;
-        font-size: xx-large;
+        font-size: clamp(1rem, 1.5vw + 1rem, 3rem);
+        line-height: 1;
         transform: translateY(20%);
     }
 
